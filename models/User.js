@@ -23,7 +23,7 @@ const userSchema = new Schema({
     type: String,
     required: true,
   },
-  procilePic: {
+  profilePic: {
     type: String,
     default: "/images/user.png",
   },
