@@ -25,6 +25,14 @@ app.use(bodyParser.json());
 
 app.use("/auth", authRoutes);
 
+app.use((error, req, res, next) => {
+  console.log("ERROR ERROR ERROR");
+  console.log(error);
+  const status = error.statusCode;
+  const message = error.message;
+  res.status(status).json({ message });
+});
+
 PORT = process.env.PORT;
 mongoose
   .connect(process.env.MONGODB_URL)
