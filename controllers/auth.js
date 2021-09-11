@@ -1,4 +1,3 @@
-const User = require("../models/User");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const { validationResult } = require("express-validator");
@@ -33,7 +32,7 @@ exports.signup = async (req, res, next) => {
   }
 };
 
-exports.lgoin = async (req, res, next) => {
+exports.signin = async (req, res, next) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     console.log(errors.array());

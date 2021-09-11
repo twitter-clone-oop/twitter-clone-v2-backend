@@ -26,7 +26,7 @@ router.post(
 
         return true;
       }),
-    body("passwrod").trim().isLength({ min: 5 }),
+    body("password").trim().isLength({ min: 5 }),
   ],
   authController.signup
 );
