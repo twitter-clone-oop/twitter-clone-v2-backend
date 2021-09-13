@@ -76,3 +76,15 @@ exports.signin = async (req, res, next) => {
     next(err);
   }
 };
+
+exports.getCheck = (req, res, next) => {
+  const token = req.get("Authorization").split("Bearer ")[1];
+
+  jwt.verify(token, process.env.JWT_SECRET, (error, decoded) => {
+    if (error) {
+      return res.status(200).json({ message: "Unauthorized" });
+    }
+    let decodedToken = decoded;
+    res.status(200).json({ token: decodedToken });
+  });
+};
