@@ -33,4 +33,6 @@ router.post(
 
 router.post("/login", authController.signin);
 
+router.get("/check", authController.getCheck);
+
 module.exports = router;
