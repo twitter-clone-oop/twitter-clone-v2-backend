@@ -8,7 +8,10 @@ require("dotenv").config();
 
 const app = express();
 
+const auth = require("./middleware/auth.js");
+
 const authRoutes = require("./routes/auth");
+const userRoutes = require("./routes/user");
 
 app.use((req, res, next) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
@@ -24,6 +27,7 @@ app.use((req, res, next) => {
 app.use(bodyParser.json());
 
 app.use("/auth", authRoutes);
+app.use("/user", auth, userRoutes);
 
 app.use((error, req, res, next) => {
   console.log("ERROR ERROR ERROR");
