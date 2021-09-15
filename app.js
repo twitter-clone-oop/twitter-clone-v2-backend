@@ -1,5 +1,7 @@
 const express = require("express");
 
+const path = require("path");
+
 const mongoose = require("mongoose");
 const bodyParser = require("body-parser");
 const jwt = require("jsonwebtoken");
@@ -13,6 +15,11 @@ const auth = require("./middleware/auth.js");
 const authRoutes = require("./routes/auth");
 const userRoutes = require("./routes/user");
 
+app.use(express.static(path.join(__dirname, "public")));
+
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded());
+
 app.use((req, res, next) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader(
@@ -24,10 +31,8 @@ app.use((req, res, next) => {
   next();
 });
 
-app.use(bodyParser.json());
-
 app.use("/auth", authRoutes);
-app.use("/user", auth, userRoutes);
+app.use("/user", userRoutes);
 
 app.use((error, req, res, next) => {
   console.log("ERROR ERROR ERROR");

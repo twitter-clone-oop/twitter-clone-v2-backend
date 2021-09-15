@@ -25,7 +25,7 @@ const userSchema = new Schema({
   },
   profilePic: {
     type: String,
-    default: "/images/user.png",
+    default: "/images/user/user.png",
   },
   coverPhoto: {
     type: String,
