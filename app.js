@@ -1,5 +1,7 @@
 const express = require("express");
 
+const path = require("path");
+
 const mongoose = require("mongoose");
 const bodyParser = require("body-parser");
 const jwt = require("jsonwebtoken");
@@ -12,6 +14,8 @@ const auth = require("./middleware/auth.js");
 
 const authRoutes = require("./routes/auth");
 const userRoutes = require("./routes/user");
+
+app.use(express.static(path.join(__dirname, "public")));
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded());
