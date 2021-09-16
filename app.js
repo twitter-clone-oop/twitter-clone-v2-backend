@@ -14,6 +14,7 @@ const auth = require("./middleware/auth.js");
 
 const authRoutes = require("./routes/auth");
 const userRoutes = require("./routes/user");
+const postRoutes = require("./routes/post");
 
 app.use(express.static(path.join(__dirname, "public")));
 
@@ -33,6 +34,7 @@ app.use((req, res, next) => {
 
 app.use("/auth", authRoutes);
 app.use("/user", userRoutes);
+app.use("/post", postRoutes);
 
 app.use((error, req, res, next) => {
   console.log("ERROR ERROR ERROR");
