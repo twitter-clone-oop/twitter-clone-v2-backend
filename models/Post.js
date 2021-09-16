@@ -9,7 +9,7 @@ const postSchema = new Schema(
     },
     postedBy: {
       type: Schema.Types.ObjectId,
-      ref: "user",
+      ref: "User",
       required: true,
     },
     likes: [
