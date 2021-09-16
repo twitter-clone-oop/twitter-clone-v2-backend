@@ -10,9 +10,9 @@ exports.postPost = async (req, res, next) => {
   };
 
   try {
-    await Post.create(post);
-
-    res.status(201).send({ messagge: `Post created!` });
+    let createdPost = await Post.create(post);
+    createdPost = await Post.findById(createdPost._id).populate("postedBy");
+    res.status(201).send({ messagge: `Post created!`, createdPost });
   } catch (err) {
     if (!err.statusCode) {
       err.statusCode = 500;
@@ -57,7 +57,6 @@ const getPostsFromDB = async (filter, next) => {
   try {
     let result = await Post.find(filter)
       .populate("postedBy")
-
       .sort({ createdAt: -1 });
 
     result = await User.populate(result, { path: "replyTo.postedBy" });
