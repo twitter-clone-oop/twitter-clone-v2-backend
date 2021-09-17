@@ -69,3 +69,19 @@ const getPostsFromDB = async (filter, next) => {
     next(error);
   }
 };
+
+exports.patchPost = async (req, res, next) => {
+  try {
+    if (req.body.pinned) {
+      await Post.updateMany({ postedBy: req.userId }, { pinned: false });
+    }
+
+    await Post.findByIdAndUpdate(req.params.postId, req.body);
+    res.sendStatus(204);
+  } catch (error) {
+    if (!error.statusCode) {
+      error.statusCode = 500;
+    }
+    next(error);
+  }
+};

@@ -9,4 +9,6 @@ router.post("/", auth, postController.postPost);
 
 router.get("/posts", auth, postController.getPosts);
 
+router.patch("/:postId", auth, postController.patchPost);
+
 module.exports = router;
