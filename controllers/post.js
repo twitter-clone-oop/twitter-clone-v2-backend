@@ -71,13 +71,33 @@ const getPostsFromDB = async (filter, next) => {
 };
 
 exports.patchPost = async (req, res, next) => {
+  const patchLogs = {};
   try {
     if (req.body.pinned) {
+      let prevPinnedPost = await Post.findOne({ pinned: true }).populate(
+        "postedBy"
+      );
+      const prevPinnedPostId = prevPinnedPost._id;
+
       await Post.updateMany({ postedBy: req.userId }, { pinned: false });
+
+      // prevPinnedPost = await Post.findById(prevPinnedPostId).populate(
+      //   "postedBy"
+      // );
+
+      prevPinnedPost.pinned = false;
+
+      patchLogs.prevPinnedPost = prevPinnedPost;
     }
 
-    await Post.findByIdAndUpdate(req.params.postId, req.body);
-    res.sendStatus(204);
+    let currentPinnedPost = await Post.findByIdAndUpdate(
+      req.params.postId,
+      req.body,
+      { new: true }
+    );
+    currentPinnedPost = await Post.populate(currentPinnedPost, "postedBy");
+    patchLogs.currentPinnedPost = currentPinnedPost;
+    res.status(201).json(patchLogs);
   } catch (error) {
     if (!error.statusCode) {
       error.statusCode = 500;
