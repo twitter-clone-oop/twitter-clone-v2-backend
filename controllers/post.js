@@ -2,8 +2,6 @@ const Post = require("../models/Post");
 const User = require("../models/User");
 
 exports.postPost = async (req, res, next) => {
-  console.log(req.body);
-
   const post = {
     postedBy: req.userId,
     content: req.body.content,
@@ -88,16 +86,38 @@ exports.patchPost = async (req, res, next) => {
       prevPinnedPost.pinned = false;
 
       patchLogs.prevPinnedPost = prevPinnedPost;
+
+      let currentPinnedPost = await Post.findByIdAndUpdate(
+        req.params.postId,
+        req.body,
+        { new: true }
+      );
+      currentPinnedPost = await Post.populate(currentPinnedPost, "postedBy");
+      patchLogs.currentPinnedPost = currentPinnedPost;
+      res.status(201).json(patchLogs);
     }
 
-    let currentPinnedPost = await Post.findByIdAndUpdate(
-      req.params.postId,
-      req.body,
-      { new: true }
-    );
-    currentPinnedPost = await Post.populate(currentPinnedPost, "postedBy");
-    patchLogs.currentPinnedPost = currentPinnedPost;
-    res.status(201).json(patchLogs);
+    if (req.body.likes) {
+      const postId = req.params.postId;
+      const userId = req.userId;
+
+      let user = await User.findById(userId);
+      const isLiked = user.likes && user.likes.includes(postId);
+
+      let option = isLiked ? "$pull" : "$addToSet";
+      user = await User.findByIdAndUpdate(
+        userId,
+        { [option]: { likes: postId } },
+        { new: true }
+      );
+
+      let post = await Post.findByIdAndUpdate(
+        postId,
+        { [option]: { likes: userId } },
+        { new: true }
+      );
+      res.status(200).json(post);
+    }
   } catch (error) {
     if (!error.statusCode) {
       error.statusCode = 500;

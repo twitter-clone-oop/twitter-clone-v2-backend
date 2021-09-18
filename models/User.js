@@ -30,6 +30,12 @@ const userSchema = new Schema({
   coverPhoto: {
     type: String,
   },
+  likes: [
+    {
+      type: Schema.Types.ObjectId,
+      ref: "Post",
+    },
+  ],
 });
 
 module.exports = mongoose.model("User", userSchema);
