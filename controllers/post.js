@@ -55,6 +55,7 @@ const getPostsFromDB = async (filter, next) => {
   try {
     let result = await Post.find(filter)
       .populate("postedBy")
+      .populate("retweetData")
       .sort({ createdAt: -1 });
 
     result = await User.populate(result, { path: "replyTo.postedBy" });
@@ -71,11 +72,12 @@ const getPostsFromDB = async (filter, next) => {
 exports.patchPost = async (req, res, next) => {
   const patchLogs = {};
   try {
+    // pin
     if (req.body.pinned) {
       let prevPinnedPost = await Post.findOne({ pinned: true }).populate(
         "postedBy"
       );
-      const prevPinnedPostId = prevPinnedPost._id;
+      const prevPinnedPostId = prevPinnedPost ? prevPinnedPost._id : null;
 
       await Post.updateMany({ postedBy: req.userId }, { pinned: false });
 
@@ -83,7 +85,9 @@ exports.patchPost = async (req, res, next) => {
       //   "postedBy"
       // );
 
-      prevPinnedPost.pinned = false;
+      if (prevPinnedPostId) {
+        prevPinnedPost.pinned = false;
+      }
 
       patchLogs.prevPinnedPost = prevPinnedPost;
 
@@ -97,6 +101,7 @@ exports.patchPost = async (req, res, next) => {
       res.status(201).json(patchLogs);
     }
 
+    // like
     if (req.body.likes) {
       const postId = req.params.postId;
       const userId = req.userId;
@@ -123,5 +128,44 @@ exports.patchPost = async (req, res, next) => {
       error.statusCode = 500;
     }
     next(error);
+  }
+
+  // retweet
+  if (req.body.retweet) {
+    const postId = req.params.postId;
+    const userId = req.userId;
+
+    const deletedPost = await Post.findOneAndDelete({
+      postedBy: userId,
+      retweetData: postId,
+    });
+
+    const option = deletedPost ? "$pull" : "$addToSet";
+    let repost = deletedPost;
+
+    if (!repost) {
+      repost = await Post.create({
+        postedBy: userId,
+        retweetData: postId,
+      });
+
+      repost = await Post.populate(repost, "postedBy");
+      repost = await Post.populate(repost, "retweetData");
+      repost = await Post.populate(repost, "retweetData.postedBy");
+    }
+
+    const user = await User.findByIdAndUpdate(
+      userId,
+      { [option]: { retweets: repost._id } },
+      { new: true }
+    );
+
+    const post = await Post.findByIdAndUpdate(
+      postId,
+      { [option]: { retweetUsers: userId } },
+      { new: true }
+    );
+
+    res.status(200).send({ post, repost });
   }
 };
