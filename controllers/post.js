@@ -169,3 +169,11 @@ exports.patchPost = async (req, res, next) => {
     res.status(200).send({ post, repost });
   }
 };
+
+exports.deletePost = async (req, res, next) => {
+  const postId = req.params.postId;
+
+  const deletedPost = await Post.findByIdAndDelete(postId);
+  console.log(deletedPost);
+  res.status(200).json({ deletedPostId: deletedPost._id });
+};
