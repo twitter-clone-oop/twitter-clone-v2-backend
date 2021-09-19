@@ -11,4 +11,6 @@ router.get("/posts", auth, postController.getPosts);
 
 router.patch("/:postId", auth, postController.patchPost);
 
+router.delete("/:postId", auth, postController.deletePost);
+
 module.exports = router;
