@@ -71,9 +71,11 @@ const getPostsFromDB = async (filter, next) => {
 
 exports.patchPost = async (req, res, next) => {
   const patchLogs = {};
+  const action = req.body.action;
+
   try {
     // pin
-    if (req.body.pinned) {
+    if (action === "pin") {
       let prevPinnedPost = await Post.findOne({ pinned: true }).populate(
         "postedBy"
       );
@@ -93,7 +95,7 @@ exports.patchPost = async (req, res, next) => {
 
       let currentPinnedPost = await Post.findByIdAndUpdate(
         req.params.postId,
-        req.body,
+        req.body.filter,
         { new: true }
       );
       currentPinnedPost = await Post.populate(currentPinnedPost, "postedBy");
@@ -101,8 +103,21 @@ exports.patchPost = async (req, res, next) => {
       res.status(201).json(patchLogs);
     }
 
+    if (action === "unpin") {
+      const postId = req.params.postId;
+
+      let unpinnedPostId = await Post.findByIdAndUpdate(
+        postId,
+        { pinned: false },
+        { new: true }
+      );
+
+      unpinnedPostId = unpinnedPostId._id;
+      res.status(200).json({ unpinnedPostId });
+    }
+
     // like
-    if (req.body.likes) {
+    if (action === "like") {
       const postId = req.params.postId;
       const userId = req.userId;
 
@@ -131,7 +146,7 @@ exports.patchPost = async (req, res, next) => {
   }
 
   // retweet
-  if (req.body.retweet) {
+  if (action === "retweet") {
     const postId = req.params.postId;
     const userId = req.userId;
 
