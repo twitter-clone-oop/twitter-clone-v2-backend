@@ -48,6 +48,7 @@ exports.getPosts = async (req, res, next) => {
       searchObj.postedBy = { $in: objectIds };
 
       const posts = await getPostsFromDB(searchObj, next);
+
       res.send(posts);
     } catch (error) {
       if (!error.statusCode) {
@@ -63,10 +64,17 @@ const getPostsFromDB = async (filter, next) => {
     let result = await Post.find(filter)
       .populate("postedBy")
       .populate("retweetData")
+      .populate("replyTo")
       .sort({ createdAt: -1 });
 
-    result = await User.populate(result, { path: "replyTo.postedBy" });
-    return await User.populate(result, { path: "retweetData.postedBy" });
+    for (let i = 0; i < result.length; i++) {
+      const post = result[i];
+      await Post.populate(post, { path: "replyTo.postedBy" });
+      await Post.populate(post, { path: "retweetData.postedBy" });
+      result[i] = post;
+    }
+
+    return result;
   } catch (error) {
     if (!error.statusCode) {
       error.statusCode = 500;
