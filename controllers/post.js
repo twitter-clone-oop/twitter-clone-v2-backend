@@ -7,9 +7,15 @@ exports.postPost = async (req, res, next) => {
     content: req.body.content,
   };
 
+  if (req.body.action === "reply") {
+    post.replyTo = req.body.replyTo;
+  }
+
   try {
     let createdPost = await Post.create(post);
-    createdPost = await Post.findById(createdPost._id).populate("postedBy");
+    createdPost = await Post.findById(createdPost._id)
+      .populate("postedBy")
+      .populate("replyTo");
     res.status(201).send({ messagge: `Post created!`, createdPost });
   } catch (err) {
     if (!err.statusCode) {
