@@ -16,6 +16,7 @@ exports.postPost = async (req, res, next) => {
     createdPost = await Post.findById(createdPost._id)
       .populate("postedBy")
       .populate("replyTo");
+    createdPost = await Post.populate(createdPost, "replyTo.postedBy");
     res.status(201).send({ messagge: `Post created!`, createdPost });
   } catch (err) {
     if (!err.statusCode) {
